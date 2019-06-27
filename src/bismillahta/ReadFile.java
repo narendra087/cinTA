@@ -39,7 +39,7 @@ public final class ReadFile {
     private ArrayList <Minggu> timeslot = new ArrayList<>();
     private ArrayList<Kelas> listKelas = new ArrayList<>();
     private ArrayList<Course> listCourse = new ArrayList<>();
-    private ArrayList<Distributions> distributions = new ArrayList<>();
+    Distributions distrib;
 
     public ReadFile(String filename) throws ParserConfigurationException, SAXException, IOException {
         File fXmlFile = new File("src/Test/" + filename);
@@ -286,7 +286,7 @@ public final class ReadFile {
         Element distribsElement = (Element) dN.getChildNodes();
         NodeList distriL = (NodeList) distribsElement.getElementsByTagName("distribution");
 
-        Distributions distrib = new Distributions();
+        distrib = new Distributions();
         for (int distri = 0; distri < distriL.getLength(); distri++) {
             required = 0;
             penalty = 10000;
@@ -335,7 +335,6 @@ public final class ReadFile {
             }
 
         }
-        getDistributions().add(distrib);
     }
 
     Room SearchRom(int IdRoom){
@@ -423,13 +422,6 @@ public final class ReadFile {
      */
     public ArrayList<Course> getListCourse() {
         return listCourse;
-    }
-
-    /**
-     * @return the distributions
-     */
-    public ArrayList<Distributions> getDistributions() {
-        return distributions;
     }
 
     /**
