@@ -27,7 +27,7 @@ public class BismillahTA {
             "muni-fi-spr16.xml", "muni-fsps-spr17.xml", "muni-pdf-spr16c.xml", "pu-llr-spr17.xml", "tg-fal17.xml"};
         int instance = 10;
 //        String sourceFile = fileName[instance-1];
-        String sourceFile = "bet-sum18.xml";
+        String sourceFile = "lums-sum17.xml";
         
         ArrayList <Minggu> timeslot;
         ArrayList<Kelas> listKelas;
@@ -115,6 +115,8 @@ public class BismillahTA {
 //                }
 //            }
 //        }
+        
+        
         int ini = 0;
         for (int i = 0; i < listKelas.size(); i++) {
             if (listKelas.get(i).isHasRoom() == false && listKelas.get(i).getTs()==-1) {
@@ -126,12 +128,15 @@ public class BismillahTA {
 //        System.out.println("");
 //        System.out.println(ini);
         System.out.println("");
-        int anu = 0;
+        int anu =0;
         for (int i = 0; i < listKelas.size(); i++) {
             if (listKelas.get(i).getTs()==-1) {
                 System.out.print(listKelas.get(i).getClassID()+ " ");
+                anu++;
             }
         }
+        System.out.println(anu);
+        System.out.println("Total penalty = "+countPenalty(listKelas));
     }
     
 //    Kelas SearchKls(int IdKls){
@@ -142,5 +147,34 @@ public class BismillahTA {
 //        }
 //        return null;
 //    }
+    public static int countPenalty(ArrayList<Kelas> listKelas){
+        int totalPenalti=0;
+        for (int i = 0; i < listKelas.size(); i++) {
+            Kelas kls = listKelas.get(i);
+            int timeP = penaltyTS(kls);
+            int roomP = penaltyRM(kls);
+            totalPenalti += timeP+roomP;
+        }
+        return totalPenalti;
+    }
     
+    static int penaltyTS(Kelas a){
+        int penalty=0;
+        int ts = a.getTs();
+        if (ts!=-1) {
+            TimeAss timeA = a.getAvailableTS().get(ts);
+            penalty = timeA.getPenalty();
+        }
+        return penalty;
+    }
+    
+    static int penaltyRM(Kelas a){
+        int penalty=0;
+        int rm = a.getRoom();
+        if (rm!=-1) {
+            RoomAss roomA = a.getAvailableroom().get(rm);
+            penalty = roomA.getRoom_pen();
+        }
+        return penalty;
+    }
 }

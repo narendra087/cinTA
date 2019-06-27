@@ -27,6 +27,7 @@ public class Kelas {
     private int limit;
     private int parent;
     private int penalty;
+    private int totalPinalti;
     private boolean hasRoom;
     private int[] inUrutan = new int[4];
     private ArrayList<RoomAss> availableroom = new ArrayList<>();
@@ -282,6 +283,20 @@ public class Kelas {
      */
     public void setPenalty(int penalty) {
         this.penalty = penalty;
+    }
+
+    /**
+     * @return the totalPinalti
+     */
+    public int getTotalPinalti() {
+        return totalPinalti;
+    }
+
+    /**
+     * @param totalPinalti the totalPinalti to set
+     */
+    public void setTotalPinalti(int totalPinalti) {
+        this.totalPinalti = totalPinalti;
     }
 }
 
