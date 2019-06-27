@@ -1,4 +1,4 @@
-package domoop;
+package bismillahta;
 
 import java.util.ArrayList;
 
@@ -7,14 +7,15 @@ public class CekSC {
     ArrayList<Kelas> listKelas;
     ArrayList<Integer> weeksA, daysA;
     ArrayList<Integer> weeksB, daysB;
+    Distributions distrib;
 
     //Return jumlah semua penalti
-    int totalPenalty(int TS, int Rom, Kelas kls, ArrayList<Kelas> listKls,
-            int[][] travel, int penalty) {
-        int jmlPenalty = 0;
-        penalty = 0;
+    int totalPenalty(ArrayList<Kelas> listKls, int[][] travel, Distributions distri){
         this.listKelas = listKls;
-        ArrayList<Constraint> SoftCons = kls.getClasSC();
+        this.distrib = distri;
+        int penalty;
+        int jmlPenalty=0;
+        ArrayList<Constraint> SoftCons = distrib.getSoftC();
         for (int i = 0; i < SoftCons.size(); i++) {
             Constraint Soft = SoftCons.get(i);
             ArrayList<Integer> KlsCons = Soft.getConsClass();
@@ -22,9 +23,11 @@ public class CekSC {
             int angka1 = Soft.getAngka1();
             int angka2 = Soft.getAngka2();
             penalty = Soft.getPenalty();
-            if (Cons1(type, angka1, angka2, TS, Rom, kls, KlsCons, penalty)
-                    || Cons2(type, TS, Rom, kls, KlsCons, travel, penalty)) {
-                jmlPenalty += penalty;
+            if (type.contains("WorkDay") || type.contains("MinGap") || type.contains("MaxDays") ||
+                type.contains("MaxDayLoad") || type.contains("MaxBreaks") || type.contains("MaxBlock")) {
+                jmlPenalty += Cons1(type, angka1, angka2, KlsCons, penalty);
+            } else {
+                jmlPenalty += Cons2(type, KlsCons, travel, penalty);
             }
         }
         return jmlPenalty;
@@ -39,70 +42,56 @@ public class CekSC {
         return null;
     }
 
-    boolean Cons1(String type, int angka1, int angka2, int TS, int Rom, Kelas kls,
-            ArrayList<Integer> distriKls, int penalty) {
-        if (type.contains("WorkDay")) {
-            Workday(TS, angka1, kls, distriKls, penalty);
-        } else if (type.contains("MinGap")) {
-            Mingap(TS, angka1, kls, distriKls, penalty);
-        } else if (type.contains("MaxDays")) {
-            Maxdays(TS, angka1, kls, penalty);
-        } else if (type.contains("MaxDayLoad")) {
-            MaxdayLoad(TS, angka1, kls, distriKls, penalty);
-        } else if (type.contains("MaxBreaks")) {
-            Maxbreaks(TS, angka1, angka2, kls, distriKls, penalty);
-        } else if (type.contains("MaxBlock")) {
-            Maxblock(TS, angka1, angka2, kls, distriKls, penalty);
-        }
-        return false;
+    int Cons1(String type, int angka1, int angka2,  
+            ArrayList<Integer> distriKls, int penalty){
+       if (type.contains("WorkDay")) {
+           return Workday(angka1, distriKls, penalty);
+       } else if (type.contains("MinGap")) {
+           return Mingap(angka1, distriKls, penalty);
+       } else if (type.contains("MaxDays")) {
+           return Maxdays(angka1, penalty);
+       } else if (type.contains("MaxDayLoad")) {
+           return MaxdayLoad(angka1, distriKls, penalty);
+       } else if (type.contains("MaxBreaks")) {
+           return Maxbreaks(angka1, angka2, distriKls, penalty);
+       } else if (type.contains("MaxBlock")) {
+           return Maxblock(angka1, angka2, distriKls, penalty);
+       }
+       return 0;
     }
 
-    boolean Cons2(String type, int TS, int Rom, Kelas kls,
-            ArrayList<Integer> distriKls, int[][] travel, int penalty) {
-        switch (type) {
+    int Cons2(String type, ArrayList<Integer> distriKls, int[][]travel, int penalty){
+       switch (type) {
             case "SameStart":
-                SameStart(TS, kls, distriKls, penalty);
-                break;
+                return SameStart(distriKls, penalty);
             case "SameTime":
-                SameTime(TS, kls, distriKls, penalty);
-                break;
+                return SameTime(distriKls, penalty);
             case "DifferentTime":
-                DifferentTime(TS, kls, distriKls, penalty);
-                break;
+                return DifferentTime(distriKls, penalty);
             case "SameDays":
-                SameDays(TS, kls, distriKls, penalty);
-                break;
+                return SameDays(distriKls, penalty);
             case "DifferentDays":
-                DifferentDays(TS, kls, distriKls, penalty);
-                break;
+                return DifferentDays(distriKls, penalty);
             case "SameWeeks":
-                SameWeeks(TS, kls, distriKls, penalty);
-                break;
+                return SameWeeks(distriKls, penalty);
             case "DifferentWeeks":
-                DifferentWeeks(TS, kls, distriKls, penalty);
-                break;
+                return DifferentWeeks(distriKls, penalty);
             case "SameRoom":
-                SameRoom(Rom, kls, distriKls, penalty);
-                break;
+                return SameRoom(distriKls, penalty);
             case "DifferentRoom":
-                DifferentRoom(Rom, kls, distriKls, penalty);
-                break;
+                return DifferentRoom(distriKls, penalty);
             case "Overlap":
-                Overlap(TS, kls, distriKls, penalty);
-                break;
+                return Overlap(distriKls, penalty);
             case "NotOverlap":
-                NotOverlap(TS, kls, distriKls, penalty);
-                break;
+                return NotOverlap(distriKls, penalty);
             case "SameAttendees":
-                SameAttendees(TS, Rom, kls, travel, distriKls, penalty);
-                break;
+                return SameAttendees(travel, distriKls, penalty);
             case "Precedence":
-                Precedence(TS, kls, distriKls, penalty);
-                break;
+                return Precedence(distriKls, penalty);
             default:
                 break;
         }
-        return false;
+        return 0;
     }
 
     //1.SAME START                                                              //Ci.start = Cj.start
