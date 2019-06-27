@@ -10,11 +10,11 @@ public class CekSC {
     Distributions distrib;
 
     //Return jumlah semua penalti
-    int totalPenalty(ArrayList<Kelas> listKls, int[][] travel, Distributions distri){
+    int totalPenalty(ArrayList<Kelas> listKls, int[][] travel, Distributions distri) {
         this.listKelas = listKls;
         this.distrib = distri;
         int penalty;
-        int jmlPenalty=0;
+        int jmlPenalty = 0;
         ArrayList<Constraint> SoftCons = distrib.getSoftC();
         for (int i = 0; i < SoftCons.size(); i++) {
             Constraint Soft = SoftCons.get(i);
@@ -23,8 +23,8 @@ public class CekSC {
             int angka1 = Soft.getAngka1();
             int angka2 = Soft.getAngka2();
             penalty = Soft.getPenalty();
-            if (type.contains("WorkDay") || type.contains("MinGap") || type.contains("MaxDays") ||
-                type.contains("MaxDayLoad") || type.contains("MaxBreaks") || type.contains("MaxBlock")) {
+            if (type.contains("WorkDay") || type.contains("MinGap") || type.contains("MaxDays")
+                    || type.contains("MaxDayLoad") || type.contains("MaxBreaks") || type.contains("MaxBlock")) {
                 jmlPenalty += Cons1(type, angka1, angka2, KlsCons, penalty);
             } else {
                 jmlPenalty += Cons2(type, KlsCons, travel, penalty);
@@ -42,26 +42,26 @@ public class CekSC {
         return null;
     }
 
-    int Cons1(String type, int angka1, int angka2,  
-            ArrayList<Integer> distriKls, int penalty){
-       if (type.contains("WorkDay")) {
-           return Workday(angka1, distriKls, penalty);
-       } else if (type.contains("MinGap")) {
-           return Mingap(angka1, distriKls, penalty);
-       } else if (type.contains("MaxDays")) {
-           return Maxdays(angka1, penalty);
-       } else if (type.contains("MaxDayLoad")) {
-           return MaxdayLoad(angka1, distriKls, penalty);
-       } else if (type.contains("MaxBreaks")) {
-           return Maxbreaks(angka1, angka2, distriKls, penalty);
-       } else if (type.contains("MaxBlock")) {
-           return Maxblock(angka1, angka2, distriKls, penalty);
-       }
-       return 0;
+    int Cons1(String type, int angka1, int angka2,
+            ArrayList<Integer> distriKls, int penalty) {
+        if (type.contains("WorkDay")) {
+            return Workday(angka1, distriKls, penalty);
+        } else if (type.contains("MinGap")) {
+            return Mingap(angka1, distriKls, penalty);
+        } else if (type.contains("MaxDays")) {
+            return Maxdays(angka1, penalty);
+        } else if (type.contains("MaxDayLoad")) {
+            return MaxdayLoad(angka1, distriKls, penalty);
+        } else if (type.contains("MaxBreaks")) {
+            return Maxbreaks(angka1, angka2, distriKls, penalty);
+        } else if (type.contains("MaxBlock")) {
+            return Maxblock(angka1, angka2, distriKls, penalty);
+        }
+        return 0;
     }
 
-    int Cons2(String type, ArrayList<Integer> distriKls, int[][]travel, int penalty){
-       switch (type) {
+    int Cons2(String type, ArrayList<Integer> distriKls, int[][] travel, int penalty) {
+        switch (type) {
             case "SameStart":
                 return SameStart(distriKls, penalty);
             case "SameTime":
@@ -95,7 +95,7 @@ public class CekSC {
     }
 
     //1.SAME START                                                              //Ci.start = Cj.start
-    int SameStart(int TS, Kelas kls, ArrayList<Integer> listSS, int penalty) {
+    int SameStart(ArrayList<Integer> listSS, int penalty) {
         int startA, startB;
         int TSA, TSB;
         int jPenalty = 0;
@@ -129,7 +129,7 @@ public class CekSC {
     }
 
     //2.SAME TIME                                                               //(Ci.start ≤ Cj.start ∧ Cj.end ≤ Ci.end) ∨ (Cj.start ≤ Ci.start ∧ Ci.end ≤ Cj.end)
-    int SameTime(int TS, Kelas kls, ArrayList<Integer> listST, int penalty) {
+    int SameTime(ArrayList<Integer> listST, int penalty) {
         int startA, lengthA, endA;
         int startB, lengthB, endB;
         int TSA, TSB;
@@ -166,7 +166,7 @@ public class CekSC {
     }
 
     //3.DIFFERENT TIME                                                          //(Ci.end ≤ Cj.start) ∨ (Cj.end ≤ Ci.start)
-    int DifferentTime(int TS, Kelas kls, ArrayList<Integer> listDT, int penalty) {
+    int DifferentTime(ArrayList<Integer> listDT, int penalty) {
         int startA, startB;
         int lengthA, lengthB;
         int endA, endB;
@@ -179,74 +179,79 @@ public class CekSC {
             startA = klsA.getAvailableTS().get(TSA).getStart();
             lengthA = klsA.getAvailableTS().get(TSA).getLength();
             endA = startA + lengthA;
+
             for (int j = i + 1; j < listDT.size(); j++) {
                 Kelas klsB = SearchKls(listDT.get(j));
                 TSB = klsB.getTs();
                 startB = klsB.getAvailableTS().get(TSB).getStart();
                 lengthB = klsB.getAvailableTS().get(TSB).getLength();
                 endB = startB + lengthB;
-                if (TSB != -1) {
-                    if (endA <= startB || endB <= startA) {
-                        jPenalty += 0;
-                    } else {
-                        jPenalty += penalty;
-                    }
-                } else if (TSB == -1) {
+
+                if (endA <= startB || endB <= startA) {
                     jPenalty += 0;
+                } else {
+                    jPenalty += penalty;
                 }
             }
         }
-
         return jPenalty;
     }
 
     //4.SAME DAYS                                                               //((Ci.days or Cj.days) = Ci.days) ∨ ((Ci.days or Cj.days) = Cj.days)
-    int SameDays(int TS, Kelas kls, ArrayList<Integer> listSD, int penalty) {
-        daysA = kls.getAvailableTS().get(TS).getDays();
+    int SameDays(ArrayList<Integer> listSD, int penalty) {
+        int TSA, TSB;
         int jPenalty = 0;
+        int salah = 0;
 
         for (int i = 0; i < listSD.size(); i++) {
-            Kelas klsB = SearchKls(listSD.get(i));
-            int iTS = klsB.getTs();
-            if (iTS != -1) {
-                daysB = klsB.getAvailableTS().get(iTS).getDays();
+            Kelas klsA = SearchKls(listSD.get(i));
+            TSA = klsA.getTs();
+            daysA = klsA.getAvailableTS().get(TSA).getDays();
+            for (int j = i + 1; j < listSD.size(); j++) {
+                Kelas klsB = SearchKls(listSD.get(j));
+                TSB = klsB.getTs();
+                daysB = klsB.getAvailableTS().get(TSB).getDays();
                 for (int dy = 0; dy < daysA.size(); dy++) {
                     if (daysA.get(dy) == 1 && daysB.get(dy) == 1) {
                         jPenalty += 0;
                         break;
                     } else {
+                        salah += 1;
+                    }
+
+                    //CEK APAKAH SEMUA HARI SALAH
+                    if (salah == daysA.size()) {
                         jPenalty += penalty;
                     }
                 }
-            } else if (iTS == -1) {
-                jPenalty += 0;
             }
         }
         return jPenalty;
     }
 
     //5.DIFFERENT DAYS                                                          //(Ci.days and Cj.days) = 0
-    int DifferentDays(int TS, Kelas kls, ArrayList<Integer> listDD, int penalty) {
-        daysA = kls.getAvailableTS().get(TS).getDays();
+    int DifferentDays(ArrayList<Integer> listDD, int penalty) {
+        int TSA, TSB;
         int jPenalty = 0;
 
         for (int i = 0; i < listDD.size(); i++) {
-            Kelas klsB = SearchKls(listDD.get(i));
-            int iTS = klsB.getTs();
-            if (iTS != -1) {
-                daysB = klsB.getAvailableTS().get(iTS).getDays();
+            Kelas klsA = SearchKls(listDD.get(i));
+            TSA = klsA.getTs();
+            daysA = klsA.getAvailableTS().get(TSA).getDays();
+            for (int j = i + 1; j < listDD.size(); j++) {
+                Kelas klsB = SearchKls(listDD.get(j));
+                TSB = klsB.getTs();
+                daysB = klsB.getAvailableTS().get(TSB).getDays();
                 for (int dy = 0; dy < daysA.size(); dy++) {
                     if ((daysA.get(dy) == 0 && daysB.get(dy) == 0)
                             || (daysA.get(dy) == 1 && daysB.get(dy) == 0)
                             || (daysA.get(dy) == 0 && daysB.get(dy) == 1)) {
-                        return jPenalty;
+                        jPenalty += 0;
                     } else {
                         jPenalty += penalty;
                         break;
                     }
                 }
-            } else if (iTS == -1) {
-                return jPenalty;
             }
         }
         return jPenalty;
@@ -254,58 +259,63 @@ public class CekSC {
 
     //6.SAME WEEKS                                                              //(Ci.weeks or Cj.weeks) = Ci.weeks) ∨ (Ci.weeks or Cj.weeks) = Cj.weeks)
     int SameWeeks(int TS, Kelas kls, ArrayList<Integer> listSW, int penalty) {
-        weeksA = kls.getAvailableTS().get(TS).getWeeks();
+        int TSA, TSB;
         int jPenalty = 0;
-        int benar = 0;
+        int salah = 0;
 
         for (int i = 0; i < listSW.size(); i++) {
-            Kelas klsB = SearchKls(listSW.get(i));
-            int iTS = klsB.getTs();
-            if (iTS != -1) {
+            Kelas klsA = SearchKls(listSW.get(i));
+            TSA = klsA.getTs();
+            weeksA = klsA.getAvailableTS().get(TSA).getWeeks();
+            for (int j = i + 1; j < listSW.size(); j++) {
+                Kelas klsB = SearchKls(listSW.get(j));
+                TSB = klsB.getTs();
+                weeksA = klsB.getAvailableTS().get(TSB).getWeeks();
                 for (int wk = 0; wk < weeksA.size(); wk++) {
-                    weeksB = klsB.getAvailableTS().get(iTS).getWeeks();
+                    weeksB = klsB.getAvailableTS().get(TSB).getWeeks();
                     if (weeksA.get(wk) == 1 && weeksB.get(wk) == 1) {
-                        benar++;
+                        jPenalty += 0;
                         break;
                     } else {
+                        salah += 1;
+                    }
+
+                    //CEK APAKAH SEMUA MINGGU SALAH
+                    if (salah == weeksA.size()) {
                         jPenalty += penalty;
                     }
                 }
-            } else if (iTS == -1) {
-                return jPenalty;
             }
         }
         return jPenalty;
     }
 
     //7.DIFFERENT WEEKS                                                         //(Ci.weeks and Cj.weeks) = 0
-    int DifferentWeeks(int TS, Kelas kls, ArrayList<Integer> listDW, int penalty) {
-        weeksA = kls.getAvailableTS().get(TS).getWeeks();
-        int idKLSA = kls.getClassID();
+    int DifferentWeeks(ArrayList<Integer> listDW, int penalty) {
+        int TSA, TSB;
         int jPenalty = 0;
 
         for (int i = 0; i < listDW.size(); i++) {
-            Kelas klsB = SearchKls(listDW.get(i));
-            int idKLSB = klsB.getClassID();
-            int iTS = klsB.getTs();
-            if (idKLSA != idKLSB) {
-                if (iTS != -1) {
-                    for (int wk = 0; wk < weeksA.size(); wk++) {
-                        weeksB = klsB.getAvailableTS().get(iTS).getWeeks();
-                        if ((weeksA.get(wk) == 0 && weeksB.get(wk) == 0)
-                                || (weeksA.get(wk) == 1 && weeksB.get(wk) == 0)
-                                || (weeksA.get(wk) == 0 && weeksB.get(wk) == 1)) {
-                            return jPenalty;
-                        } else {
-                            jPenalty += penalty;
-                            break;
-                        }
+            Kelas klsA = SearchKls(listDW.get(i));
+            TSA = klsA.getTs();
+            weeksA = klsA.getAvailableTS().get(TSA).getWeeks();
+
+            for (int j = i + 1; j < listDW.size(); j++) {
+                Kelas klsB = SearchKls(listDW.get(j));
+                TSB = klsB.getTs();
+                weeksB = klsB.getAvailableTS().get(TSB).getWeeks();
+
+                for (int wk = 0; wk < weeksA.size(); wk++) {
+                    weeksB = klsB.getAvailableTS().get(TSB).getWeeks();
+                    if ((weeksA.get(wk) == 0 && weeksB.get(wk) == 0)
+                            || (weeksA.get(wk) == 1 && weeksB.get(wk) == 0)
+                            || (weeksA.get(wk) == 0 && weeksB.get(wk) == 1)) {
+                        jPenalty += 0;
+                    } else {
+                        jPenalty += penalty;
+                        break;
                     }
-                } else if (iTS == -1) {
-                    return jPenalty;
                 }
-            } else {
-                return jPenalty;
             }
         }
         return jPenalty;
