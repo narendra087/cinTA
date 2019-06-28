@@ -258,7 +258,7 @@ public class CekSC {
     }
 
     //6.SAME WEEKS                                                              //(Ci.weeks or Cj.weeks) = Ci.weeks) ∨ (Ci.weeks or Cj.weeks) = Cj.weeks)
-    int SameWeeks(int TS, Kelas kls, ArrayList<Integer> listSW, int penalty) {
+    int SameWeeks(ArrayList<Integer> listSW, int penalty) {
         int TSA, TSB;
         int jPenalty = 0;
         int salah = 0;
@@ -322,124 +322,208 @@ public class CekSC {
     }
 
     //8.SAME ROOM                                                               //Ci.room = Cj.room
-    int SameRoom(int Rom, Kelas kls, ArrayList<Integer> listSR, int penalty) {
-        int roomA = kls.getAvailableroom().get(Rom).getRoom_id();
-        int idKLSA = kls.getClassID();
+    int SameRoom(ArrayList<Integer> listSR, int penalty) {
+        int roomA, roomB;
+        int RMA, RMB;
         int jPenalty = 0;
 
         for (int i = 0; i < listSR.size(); i++) {
-            Kelas klsB = SearchKls(listSR.get(i));
-            int idKLSB = klsB.getClassID();
-            if (idKLSA != idKLSB) {
-                int iRM = klsB.getRoom();
-                if (iRM != -1) {
-                    int roomB = klsB.getAvailableroom().get(iRM).getRoom_id();
-                    if (roomA == roomB) {
-                        return jPenalty;
-                    } else {
-                        jPenalty += penalty;
-                    }
-                } else if (iRM == -1) {
-                    return jPenalty;
+            Kelas klsA = SearchKls(listSR.get(i));
+            RMA = klsA.getRoom();
+            roomA = klsA.getAvailableroom().get(RMA).getRoom_id();
+            for (int j = i + 1; j < 10; j++) {
+                Kelas klsB = SearchKls(listSR.get(j));
+                RMB = klsB.getRoom();
+                roomB = klsB.getAvailableroom().get(RMB).getRoom_id();
+                if (roomA == roomB) {
+                    jPenalty += 0;
+                } else {
+                    jPenalty += penalty;
                 }
-            } else {
-                return jPenalty;
             }
         }
         return jPenalty;
     }
 
     //9.DIFFERENT ROOM                                                          //Ci.room ≠ Cj.room
-    int DifferentRoom(int Rom, Kelas kls, ArrayList<Integer> listDR, int penalty) {
-        int roomA = kls.getAvailableroom().get(Rom).getRoom_id();
+    int DifferentRoom(ArrayList<Integer> listDR, int penalty) {
+        int roomA, roomB;
+        int RMA, RMB;
         int jPenalty = 0;
 
         for (int i = 0; i < listDR.size(); i++) {
-            Kelas klsB = SearchKls(listDR.get(i));
-            int iRM = klsB.getTs();
-            if (iRM != -1) {
-                int roomB = klsB.getAvailableroom().get(iRM).getRoom_id();
+            Kelas klsA = SearchKls(listDR.get(i));
+            RMA = klsA.getRoom();
+            roomA = klsA.getAvailableroom().get(RMA).getRoom_id();
+            for (int j = i + 1; j < 10; j++) {
+                Kelas klsB = SearchKls(listDR.get(j));
+                RMB = klsB.getRoom();
+                roomB = klsB.getAvailableroom().get(RMB).getRoom_id();
                 if (roomA != roomB) {
-                    return jPenalty;
+                    jPenalty += 0;
                 } else {
                     jPenalty += penalty;
                 }
-            } else if (iRM == -1) {
-                return jPenalty;
             }
         }
         return jPenalty;
     }
 
     //10.OVERLAP                                                                //(Cj.start < Ci.end) ∧ (Ci.start < Cj.end) ∧ ((Ci.days and Cj.days) ≠ 0) ∧ ((Ci.weeks and Cj.weeks) ≠ 0)
-    int Overlap(int TS, Kelas kls, ArrayList<Integer> listOv, int penalty) {
-        int startA = kls.getAvailableTS().get(TS).getStart();
-        int lengthA = kls.getAvailableTS().get(TS).getLength();
-        int endA = startA + lengthA;
-        weeksA = kls.getAvailableTS().get(TS).getWeeks();
-        daysA = kls.getAvailableTS().get(TS).getDays();
+    int Overlap(ArrayList<Integer> listOv, int penalty) {
+        int startA, startB;
+        int TSA, TSB;
+        int lengthA, lengthB;
+        int endA, endB;
         int jPenalty = 0;
-        int benar = 0;
+        int weekSalah = 0, daySalah = 0;
 
         for (int i = 0; i < listOv.size(); i++) {
-            Kelas klsB = SearchKls(listOv.get(i));
-            int iTS = klsB.getTs();
-            if (iTS != -1) {
-                int startB = klsB.getAvailableTS().get(iTS).getStart();
-                int lengthB = klsB.getAvailableTS().get(iTS).getLength();
-                int endB = startB + lengthB;
-                weeksB = klsB.getAvailableTS().get(iTS).getWeeks();
-                daysB = klsB.getAvailableTS().get(iTS).getDays();
-
+            Kelas klsA = SearchKls(listOv.get(i));
+            TSA = klsA.getTs();
+            startA = klsA.getAvailableTS().get(TSA).getStart();
+            lengthA = klsA.getAvailableTS().get(TSA).getLength();
+            endA = startA + lengthA;
+            weeksA = klsA.getAvailableTS().get(TSA).getWeeks();
+            daysA = klsA.getAvailableTS().get(TSA).getDays();
+            for (int j = i + 1; j < listOv.size(); j++) {
+                Kelas klsB = SearchKls(listOv.get(j));
+                TSB = klsB.getTs();
+                startB = klsB.getAvailableTS().get(TSB).getStart();
+                lengthB = klsB.getAvailableTS().get(TSB).getLength();
+                endB = startB + lengthB;
+                weeksB = klsB.getAvailableTS().get(TSB).getWeeks();
+                daysB = klsB.getAvailableTS().get(TSB).getDays();
                 if ((startB < endA) && (startA < endB)) {
                     outerloop:
                     for (int wk = 0; wk < weeksA.size(); wk++) {
                         if (weeksA.get(wk) == 1 && weeksB.get(wk) == 1) {
                             for (int dy = 0; dy < daysA.size(); dy++) {
                                 if (daysA.get(dy) == 1 && daysB.get(dy) == 1) {
-                                    benar++;
+                                    jPenalty += 0;
                                     break outerloop;
                                 } else {
-                                    jPenalty += penalty;
+                                    daySalah += 1;
+                                    if (daySalah == daysA.size()) {
+                                        jPenalty += penalty;
+                                    }
                                 }
+                            }
+                        } else {
+                            weekSalah += 1;
+                            if (weekSalah == weeksA.size()) {
+                                jPenalty += penalty;
                             }
                         }
                     }
-                } else {                //MASIH BINGUNG DIKASIH ELSE/ENGGAK
-                    return jPenalty;
+                } else {
+                    jPenalty += penalty;
                 }
-            } else if (iTS == -1) {
-                return jPenalty;
             }
         }
         return jPenalty;
     }
 
     //11.NOT OVERLAP                                                            //(Ci.end ≤ Cj.start) ∨ (Cj.end ≤ Ci.start) ∨ ((Ci.days and Cj.days) = 0) ∨ ((Ci.weeks and Cj.weeks) = 0)
-    int NotOverlap(int TS, Kelas kls, ArrayList<Integer> listNotOv, int penalty) {
-        int startA = kls.getAvailableTS().get(TS).getStart();
-        int lengthA = kls.getAvailableTS().get(TS).getLength();
-        int endA = startA + lengthA;
-        weeksA = kls.getAvailableTS().get(TS).getWeeks();
-        daysA = kls.getAvailableTS().get(TS).getDays();
+    int NotOverlap(ArrayList<Integer> listNotOv, int penalty) {
+        int startA, startB;
+        int lengthA, lengthB;
+        int TSA, TSB;
+        int endA, endB;
+
         int jPenalty = 0;
 
         for (int i = 0; i < listNotOv.size(); i++) {
-            Kelas klsB = SearchKls(listNotOv.get(i));
-            int iTS = klsB.getTs();
-            if (iTS != -1) {
-                int startB = klsB.getAvailableTS().get(iTS).getStart();
-                int lengthB = klsB.getAvailableTS().get(iTS).getLength();
-                int endB = startB + lengthB;
-                weeksB = klsB.getAvailableTS().get(iTS).getWeeks();
-                daysB = klsB.getAvailableTS().get(iTS).getDays();
+            Kelas klsA = SearchKls(listNotOv.get(i));
+            TSA = klsA.getTs();
+            startA = klsA.getAvailableTS().get(TSA).getStart();
+            lengthA = klsA.getAvailableTS().get(TSA).getLength();
+            weeksA = klsA.getAvailableTS().get(TSA).getWeeks();
+            daysA = klsA.getAvailableTS().get(TSA).getDays();
+            endA = startA + lengthA;
+            for (int j = i + 1; j < listNotOv.size(); j++) {
+                Kelas klsB = SearchKls(listNotOv.get(i));
+                TSB = klsB.getTs();
+                startB = klsB.getAvailableTS().get(TSB).getStart();
+                lengthB = klsB.getAvailableTS().get(TSB).getLength();
+                endB = startB + lengthB;
+                weeksB = klsB.getAvailableTS().get(TSB).getWeeks();
+                daysB = klsB.getAvailableTS().get(TSB).getDays();
 
+                outerloop:
                 for (int wk = 0; wk < weeksA.size(); wk++) {
                     if (weeksA.get(wk) == 1 && weeksB.get(wk) == 1) {
                         for (int dy = 0; dy < daysA.size(); dy++) {
                             if (daysA.get(dy) == 1 && daysB.get(dy) == 1) {
                                 if ((endA <= startB) || (endB <= startA)) {
-                                    return jPenalty;
+                                    jPenalty += 0;
+                                } else {
+                                    jPenalty += penalty;
+                                    break outerloop;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return jPenalty;
+    }
+//12.SAME ATTENDEES                                                         //(Ci.end + Ci.room.travel[Cj.room] ≤ Cj.start) ∨ (Cj.end + Cj.room.travel[Ci.room] ≤ Ci.start) ∨ ((Ci.days and Cj.days) = 0) ∨ ((Ci.weeks and Cj.weeks) = 0) Ci.room.travel[Cj.room] is the travel time between the assigned rooms of Ci and Cj
+
+    int SameAttendees(int[][] valueTravel, ArrayList<Integer> listSA, int penalty) {
+        int trvl = 0;
+        boolean noRoomA = false;
+        boolean noRoomB = false;
+        int TSA, TSB;
+        int RMA, RMB;
+        int roomA = 0, roomB = 0;
+        int startA, startB;
+        int lengthA, lengthB;
+        int endA, endB;
+        int jPenalty = 0;
+
+        for (int i = 0; i < listSA.size(); i++) {
+            Kelas klsA = SearchKls(listSA.get(i));
+            TSA = klsA.getTs();
+            RMA = klsA.getRoom();
+            if (RMA < 0) {
+                noRoomA = true;
+            } else {
+                roomA = klsA.getAvailableroom().get(RMA).getRoom_id() - 1;
+            }
+            startA = klsA.getAvailableTS().get(TSA).getStart();
+            lengthA = klsA.getAvailableTS().get(TSA).getLength();
+            endA = startA + lengthA;
+            weeksA = klsA.getAvailableTS().get(TSA).getWeeks();
+            daysA = klsA.getAvailableTS().get(TSA).getDays();
+            for (int j = i + 1; j < listSA.size(); j++) {
+                Kelas klsB = SearchKls(listSA.get(j));
+                TSB = klsB.getTs();
+                RMB = klsB.getRoom();
+                if (RMB < 0) {
+                    noRoomB = true;
+                } else {
+                    roomB = klsB.getAvailableroom().get(RMB).getRoom_id() - 1;
+                }
+                startB = klsB.getAvailableTS().get(TSB).getStart();
+                lengthB = klsB.getAvailableTS().get(TSB).getLength();
+                endB = startB + lengthB;
+                weeksB = klsB.getAvailableTS().get(TSB).getWeeks();
+                daysB = klsB.getAvailableTS().get(TSB).getDays();
+
+                if (noRoomA == false && noRoomB == false) {
+                    trvl = valueTravel[roomA][roomB];
+                }
+
+                outerloop:
+                for (int wk = 0; wk < weeksA.size(); wk++) {
+                    if (weeksA.get(wk) == 1 && weeksB.get(wk) == 1) {
+                        for (int dy = 0; dy < daysA.size(); dy++) {
+                            if (daysA.get(dy) == 1 && daysB.get(dy) == 1) {
+                                if ((endA + trvl) <= startB || (endB + trvl) <= startA) {
+                                    jPenalty += 0;
+                                    break outerloop;
                                 } else {
                                     jPenalty += penalty;
                                 }
@@ -447,138 +531,68 @@ public class CekSC {
                         }
                     }
                 }
-            } else if (iTS == -1) {
-                return jPenalty;
-            }
-        }
-        return jPenalty;
-    }
-
-    //12.SAME ATTENDEES                                                         //(Ci.end + Ci.room.travel[Cj.room] ≤ Cj.start) ∨ (Cj.end + Cj.room.travel[Ci.room] ≤ Ci.start) ∨ ((Ci.days and Cj.days) = 0) ∨ ((Ci.weeks and Cj.weeks) = 0) Ci.room.travel[Cj.room] is the travel time between the assigned rooms of Ci and Cj
-    int SameAttendees(int TS, int Rom, Kelas kls, int[][] valueTravel,
-            ArrayList<Integer> listSA, int penalty) {
-        int trvl = 0;
-        int roomA = 0;
-        boolean noRoomA = false;
-        boolean noRoomB = false;
-        int idKLSA = kls.getClassID();
-        int startA = kls.getAvailableTS().get(TS).getStart();
-        int lengthA = kls.getAvailableTS().get(TS).getLength();
-        int endA = startA + lengthA;
-        weeksA = kls.getAvailableTS().get(TS).getWeeks();
-        daysA = kls.getAvailableTS().get(TS).getDays();
-        int jPenalty = 0;
-        int benar = 0;
-
-        if (Rom < 0) {
-            noRoomA = true;
-        } else {
-            roomA = kls.getAvailableroom().get(Rom).getRoom_id() - 1;
-        }
-
-        for (int i = 0; i < listSA.size(); i++) {
-            Kelas klsB = SearchKls(listSA.get(i));
-            int idKLSB = klsB.getClassID();
-            int iTS = klsB.getTs();
-            int iRM = klsB.getRoom();
-            if (idKLSA != idKLSB) {
-                if (klsB.isHasRoom() == false) {
-                    iRM = 999;
-                }
-                if (iTS != -1 && iRM != -1) {
-                    int startB = klsB.getAvailableTS().get(iTS).getStart();
-                    int lengthB = klsB.getAvailableTS().get(iTS).getLength();
-                    int endB = startB + lengthB;
-                    weeksB = klsB.getAvailableTS().get(iTS).getWeeks();
-                    daysB = klsB.getAvailableTS().get(iTS).getDays();
-                    int roomB = 0;
-
-                    if (iRM == 999) {
-                        noRoomB = true;
-                    } else {
-                        roomB = klsB.getAvailableroom().get(iRM).getRoom_id() - 1;
-                    }
-
-                    if (noRoomA == false && noRoomB == false) {
-                        trvl = valueTravel[roomA][roomB];
-                    }
-
-                    outerloop:
-                    for (int wk = 0; wk < weeksA.size(); wk++) {
-                        if (weeksA.get(wk) == 1 && weeksB.get(wk) == 1) {
-                            for (int dy = 0; dy < daysA.size(); dy++) {
-                                if (daysA.get(dy) == 1 && daysB.get(dy) == 1) {
-                                    if ((endA + trvl) <= startB || (endB + trvl) <= startA) {
-                                        benar++;
-                                        break outerloop;
-                                    } else {
-                                        jPenalty += penalty;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else if (iTS == -1) {
-                    return jPenalty;
-                }
-            } else if (idKLSA == idKLSB) {    //CEK BENER NGGAK
-                return jPenalty;
             }
         }
         return jPenalty;
     }
 
     //13.PRECEDENCE                                                             //(first(Ci.weeks) < first(Cj.weeks)) ∨ [(first(Ci.weeks) = first(Cj.weeks)) ∧ [(first(Ci .days) < first(Cj .days)) ∨ ((first(Ci.days) = first(Cj.days)) ∧ (Ci.end ≤ Cj.start))]] for any two classes Ci and Cj from the constraint where i < j and first(x) is the index of the first non-zero bit in the binary string x.
-    int Precedence(int TS, Kelas kls, ArrayList<Integer> listP, int penalty) {
-        int startA = kls.getAvailableTS().get(TS).getStart();
-        int lengthA = kls.getAvailableTS().get(TS).getLength();
-        int endA = startA + lengthA;
-        weeksA = kls.getAvailableTS().get(TS).getWeeks();
-        daysA = kls.getAvailableTS().get(TS).getDays();
-        int iKlsA = listP.indexOf(kls.getClassID());
+    int Precedence(ArrayList<Integer> listP, int penalty) {
+        int startA, startB;
+        int lengthA, lengthB;
+        int endA, endB;
+        int TSA, TSB;
         int jPenalty = 0;
-        int benar = 0;
 
         for (int i = 0; i < listP.size(); i++) {
-            if (i < iKlsA) {
-                Kelas klsB = SearchKls(listP.get(i));
-                int iTS = klsB.getTs();
-                if (iTS != -1) {
-                    int startB = klsB.getAvailableTS().get(iTS).getStart();
-                    int lengthB = klsB.getAvailableTS().get(iTS).getLength();
-                    int endB = startB + lengthB;
-                    weeksB = klsB.getAvailableTS().get(iTS).getWeeks();
-                    daysB = klsB.getAvailableTS().get(iTS).getDays();
+            Kelas klsA = SearchKls(listP.get(i));
+            TSA = klsA.getTs();
+            startA = klsA.getAvailableTS().get(TSA).getStart();
+            lengthA = klsA.getAvailableTS().get(TSA).getLength();
+            endA = startA + lengthA;
+            weeksA = klsA.getAvailableTS().get(TSA).getWeeks();
+            daysA = klsA.getAvailableTS().get(TSA).getDays();
+            for (int j = i + 1; j < listP.size(); j++) {
+                Kelas klsB = SearchKls(listP.get(j));
+                TSB = klsB.getTs();
+                startB = klsB.getAvailableTS().get(TSB).getStart();
+                lengthB = klsB.getAvailableTS().get(TSB).getLength();
+                endB = startB + lengthB;
+                weeksB = klsB.getAvailableTS().get(TSB).getWeeks();
+                daysB = klsB.getAvailableTS().get(TSB).getDays();
 
-                    outerloop:
-                    for (int wk = 0; wk < weeksA.size(); wk++) {
-                        if (weeksA.get(wk) == 1 && weeksB.get(wk) == 1) {
-                            for (int dy = 0; dy < daysA.size(); dy++) {
-                                if (daysA.get(dy) == 1 && daysB.get(dy) == 1) {
-                                    if (endB <= startA) {
-                                        benar++;
-                                        break outerloop;
-                                    } else {
-                                        jPenalty += penalty;
-                                    }
-                                } else if (daysA.get(dy) < daysB.get(dy)) {
-                                    benar++;
+                outerloop:
+                for (int wk = 0; wk < weeksA.size(); wk++) {
+                    if (weeksA.get(wk) > weeksB.get(wk)) {
+                        for (int dy = 0; dy < daysA.size(); dy++) {
+                            if (daysA.get(dy) == 1 && daysB.get(dy) == 1) {
+                                if (endB <= startA) {
+                                    jPenalty += 0;
                                     break outerloop;
-                                } else if (daysA.get(dy) > daysB.get(dy)) {
+                                } else {
                                     jPenalty += penalty;
                                 }
+                            } else if (daysA.get(dy) < daysB.get(dy)) {
+                                benar++;
+                                break outerloop;
+                            } else if (daysA.get(dy) > daysB.get(dy)) {
+                                jPenalty += penalty;
                             }
-                        } else if (weeksA.get(wk) < weeksB.get(wk)) {
-                            benar++;
-                            break;
-                        } else if (weeksA.get(wk) > weeksB.get(wk)) {
-                            jPenalty += penalty;
                         }
+                    } else if (weeksA.get(wk) < weeksB.get(wk)) {
+                        benar++;
+                        break;
+                    } else if (weeksA.get(wk) > weeksB.get(wk)) {
+                        jPenalty += penalty;
                     }
-                } else if (iTS == -1) {
+                }
+                if (i < iKlsA) {
+
+                }
+            }else if (iTS == -1) {
                     return jPenalty;
                 }
-            } else if (iKlsA < i) {
+        }else if (iKlsA < i) {
                 Kelas klsB = SearchKls(listP.get(i));
                 int iTS = klsB.getTs();
                 if (iTS != -1) {
@@ -617,12 +631,14 @@ public class CekSC {
                     return jPenalty;
                 }
             }
-        }
-        return jPenalty;
     }
+    return jPenalty ;
+}
 
-    //14.WORKDAY(S)                                                             //((Ci.days and Cj.days) = 0) ∨ ((Ci.weeks and Cj.weeks) = 0) ∨ (max(Ci.end,Cj.end)−min(Ci.start,Cj.start) ≤ S)
-    int Workday(int TS, int S, Kelas kls, ArrayList<Integer> listWD, int penalty) {
+//14.WORKDAY(S)                                                             //((Ci.days and Cj.days) = 0) ∨ ((Ci.weeks and Cj.weeks) = 0) ∨ (max(Ci.end,Cj.end)−min(Ci.start,Cj.start) ≤ S)
+int Workday(int TS, int S, Kelas kls,
+            ArrayList<Integer> listWD, int penalty
+    ) {
         int startA = kls.getAvailableTS().get(TS).getStart();
         int lengthA = kls.getAvailableTS().get(TS).getLength();
         int endA = startA + lengthA;
@@ -665,7 +681,9 @@ public class CekSC {
     }
 
     //15.MINGAP(G)                                                              //((Ci.days and Cj.days) = 0) ∨ ((Ci.weeks and Cj.weeks) = 0) ∨ (Ci.end + G ≤ Cj.start) ∨ (Cj.end + G ≤ Ci.start)
-    int Mingap(int TS, int G, Kelas kls, ArrayList<Integer> listMG, int penalty) {
+    int Mingap(int TS, int G, Kelas kls,
+            ArrayList<Integer> listMG, int penalty
+    ) {
         int startA = kls.getAvailableTS().get(TS).getStart();
         int lengthA = kls.getAvailableTS().get(TS).getLength();
         int endA = startA + lengthA;
@@ -711,7 +729,9 @@ public class CekSC {
     }
 
     //16.MAXDAYS(D)                                                             //countNonzeroBits(C1.days or C2.days or ⋅ ⋅ ⋅ Cn.days) ≤ D
-    int Maxdays(int TS, int D, Kelas kls, int penalty) {
+    int Maxdays(int TS, int D, Kelas kls,
+            int penalty
+    ) {
         daysA = kls.getAvailableTS().get(TS).getDays();
         int jPenalty = 0;
         int lebih = 0;
@@ -726,8 +746,10 @@ public class CekSC {
     }
 
     //17.MAXDAYLOAD(S)                                                          //DayLoad(d,w) ≤ S >>> DayLoad(d,w) = ∑i {Ci.length | (Ci.days and 2^d) ≠ 0 ∧ (Ci.weeks and 2^w) ≠ 0)}
-    int MaxdayLoad(int TS, int S, Kelas kls, ArrayList<Integer> listMDL,
-            int penalty) {
+    int MaxdayLoad(int TS, int S, Kelas kls,
+            ArrayList<Integer> listMDL,
+            int penalty
+    ) {
         int length = kls.getAvailableTS().get(TS).getLength();
         weeksA = kls.getAvailableTS().get(TS).getWeeks();
         daysA = kls.getAvailableTS().get(TS).getDays();
@@ -742,8 +764,10 @@ public class CekSC {
     }
 
     //18.MAXBREAKS(R,S)                                                         //|MergeBlocks{(C.start, C.end) | (C.days and 2d) ≠ 0 ∧ (C.weeks and 2w) ≠ 0})| ≤ R + 1 >> (Ba.end + S ≥ Bb.start) ∧ (Bb.end + S ≥ Ba.start) ⇒ (B.start = min(Ba.start, Bb.start)) ∧ (B.end = max(Ba.end, Bb.end))
-    int Maxbreaks(int TS, int R, int S, Kelas kls, ArrayList<Integer> listMB,
-            int penalty) {
+    int Maxbreaks(int TS, int R, int S, Kelas kls,
+            ArrayList<Integer> listMB,
+            int penalty
+    ) {
         int jPenalty = 0;
 
         if (MergeBlocks(TS, S, kls, listMB) <= (R + 1)) {
@@ -755,8 +779,10 @@ public class CekSC {
     }
 
     //19.MAXBLOCK(M,S)                                                          //max {B.end − B.start | B ∈ MergeBlocks{(C.start, C.end) | (C.days and 2d) ≠ 0 ∧ (C.weeks and 2w) ≠ 0}} ≤ M
-    int Maxblock(int TS, int M, int S, Kelas kls, ArrayList<Integer> listMBL,
-            int penalty) {
+    int Maxblock(int TS, int M, int S, Kelas kls,
+            ArrayList<Integer> listMBL,
+            int penalty
+    ) {
         int jPenalty = 0;
 
         if (MergeBlockB(TS, M, S, kls, listMBL) <= M) {
