@@ -30,9 +30,9 @@ public final class ReadFile {
     private int jRoom;
     int  jClass, courseId, configId, subpartId, classId, idRomBesar,
             parent, limit, required, penalty, classDis, jCourse;
-    String type;
+    String type, namaFile;
     boolean hasRoom;
-    int[] roomcap;
+    int[] roomcap, bobot;
     int[][] travelroom, classSpec, classlimit;
     int[][][][] unroom;
     ArrayList<Room> listRoom = new ArrayList<>();
@@ -50,11 +50,23 @@ public final class ReadFile {
 
         Element rootElement = doc.getDocumentElement();
         Element problemChild = (Element) rootElement.getChildNodes();
-
+        
+        namaFile = rootElement.getAttribute("name");
         jWeek = Integer.parseInt(rootElement.getAttribute("nrWeeks"));
         jDays = Integer.parseInt(rootElement.getAttribute("nrDays"));
         jSlot = Integer.parseInt(rootElement.getAttribute("slotsPerDay")) + 1;
-
+        
+        bobot = new int[4];
+        NodeList bL = problemChild.getElementsByTagName("optimization");
+        Node bN = bL.item(0);
+        Element bobotE = (Element) bN;
+        
+        //MENYIMPAN BOBOT DARI SETIAP PENALTY
+        bobot[0] = Integer.parseInt(bobotE.getAttribute("time")); //untuk bobot penalty timeslot
+        bobot[1] = Integer.parseInt(bobotE.getAttribute("room")); // untuk bobot penalty room
+        bobot[2] = Integer.parseInt(bobotE.getAttribute("distribution")); // untuk bobot penalty distribution
+        bobot[3] = Integer.parseInt(bobotE.getAttribute("student")); // untuk bobot penalty student
+        
         ReadRoom(problemChild);
         ReadCourse(problemChild);
         ReadCons(problemChild);
