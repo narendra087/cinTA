@@ -39,7 +39,7 @@ public final class InitSol {
             ArrayList<TimeAss> availableTS = kelas.getAvailableTS();
             ArrayList<RoomAss> availableroom = kelas.getAvailableroom();
             
-//            if(TS==-1){
+//            if(TS==-1){ // untuk backtrack, sbg penanda
                 if (kelas.isHasRoom()==false) {
                     int rmI = kelas.getRoom();
                     for (int ts = 0; ts < availableTS.size(); ts++) {
@@ -92,10 +92,12 @@ public final class InitSol {
                         }
                     }
                 }
+//                untuk backtrack apabila tidak ada jadwal yang bisa di assign
 //                if (TS==-1) {
 //                    System.out.println("Balik Nih");
 //                    kls -= 2;
 //                }
+//            // BACKTRACK
 //            } else if (TS!=-1) {
 //                int TS2=TS;
 //                int RM2=RM, RM1=RM;
@@ -284,46 +286,5 @@ public final class InitSol {
             }
         }
         return true;
-    }
-    
-    boolean cekTSwR(TimeAss time){
-        weeks = time.getWeeks();
-        days = time.getDays();
-        start = time.getStart();
-        length = time.getLength();
-        
-        for (int wk = 0; wk < weeks.size(); wk++) {
-            if (weeks.get(wk)==1) {
-                for (int day = 0; day < days.size(); day++) {
-                    if (days.get(day)==1) {
-                        for (int tm = start; tm <= (start+length); tm++) {
-                            if (timeslot.get(wk).listHari.get(day).timeNoRom[tm]!=0) {
-                                return false;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return true;
-    }
-    
-        void assignNoRom(int idKls, TimeAss time){
-        weeks = time.getWeeks();
-        days = time.getDays();
-        start = time.getStart();
-        length = time.getLength();
-        for (int wk = 0; wk < weeks.size(); wk++) {
-            if (weeks.get(wk)==1) {
-                for (int day = 0; day < days.size(); day++) {
-                    if (days.get(day)==1) {
-                        for (int tm = start; tm <= (start+length); tm++) {
-                            timeslot.get(wk).listHari.get(day).timeNoRom[tm] = idKls;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
+    }    
 }
